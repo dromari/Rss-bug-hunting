@@ -12,6 +12,7 @@ let nextId = 1;
 
 function addTask() {
   const text = input.value.trim();
+
   if (!text) {
     errorEl.textContent = "Введите текст задачи";
     errorEl.hidden = false;
@@ -46,7 +47,7 @@ function getVisibleTasks() {
   if (currentFilter === "active") {
     return tasks.filter((t) => !t.done);
   }
-  if (currentFilter === "completed") {
+  if (currentFilter === "done") {
     return tasks.filter((t) => t.done);
   }
   return tasks;
@@ -67,7 +68,7 @@ function render() {
     const li = document.createElement("li");
     li.className = "task";
     if (task.done) {
-      li.classList.add("completed");
+      li.classList.add("done");
     }
 
     const span = document.createElement("span");
