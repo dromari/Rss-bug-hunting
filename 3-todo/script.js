@@ -11,8 +11,8 @@ let currentFilter = "all";
 let nextId = 1;
 
 function addTask() {
+  // [Баг 2]
   const text = input.value.trim();
-
   if (!text) {
     errorEl.textContent = "Введите текст задачи";
     errorEl.hidden = false;
@@ -27,6 +27,7 @@ function addTask() {
 
 function toggleTask(id) {
   const task = tasks.find((t) => t.id === id);
+  // [Баг 5]
   if (task) {
     task.done = !task.done;
     render();
@@ -34,11 +35,13 @@ function toggleTask(id) {
 }
 
 function deleteTask(id) {
+  // [Баг 6]
   tasks = tasks.filter((t) => t.id !== id);
   render();
 }
 
 function clearCompleted() {
+  // [Баг 10]
   tasks = tasks.filter((t) => !t.done);
   render();
 }
@@ -47,6 +50,7 @@ function getVisibleTasks() {
   if (currentFilter === "active") {
     return tasks.filter((t) => !t.done);
   }
+  // [Баг 8]
   if (currentFilter === "done") {
     return tasks.filter((t) => t.done);
   }
@@ -54,19 +58,24 @@ function getVisibleTasks() {
 }
 
 function updateCounter() {
+  // [Баг 7]
   const activeCount = tasks.filter((t) => !t.done).length;
   counter.textContent = "Активных задач: " + activeCount;
 }
 
 function render() {
+  // [Баг 9]
   list.innerHTML = "";
 
   const visible = getVisibleTasks();
 
+  // [Баг 3]
   for (let i = 0; i < visible.length; i++) {
     const task = visible[i];
     const li = document.createElement("li");
     li.className = "task";
+
+    // [Баг 4]
     if (task.done) {
       li.classList.add("done");
     }
@@ -88,6 +97,7 @@ function render() {
   updateCounter();
 }
 
+// [Баг 1]
 addBtn.addEventListener("click", addTask);
 clearBtn.addEventListener("click", clearCompleted);
 

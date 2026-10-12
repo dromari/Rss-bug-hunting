@@ -17,19 +17,24 @@ const grid = document.getElementById("grid");
 const countEl = document.getElementById("count");
 
 function getFiltered() {
+  // [Баг 7]
   let result = [...products];
+  // [Баг 3]
   const search = searchInput.value.trim().toLowerCase();
   const category = categorySelect.value;
   const sort = sortSelect.value;
 
+  // [Баг 4 и Баг 8]
   if (search) {
     result = result.filter((p) => p.name.toLowerCase().includes(search));
   }
 
+  // [Баг 5 и Баг 8]
   if (category !== "all") {
     result = result.filter((p) => p.category === category);
   }
 
+  // [Баг 6]
   if (sort === "asc") {
     result.sort((a, b) => a.price - b.price);
   } else if (sort === "desc") {
@@ -40,6 +45,7 @@ function getFiltered() {
 }
 
 function render() {
+  // [Баг 2]
   grid.innerHTML = "";
   const items = getFiltered();
   items.forEach((p) => {
@@ -48,6 +54,7 @@ function render() {
     card.innerHTML = `<h3>${p.name}</h3><p class="cat">${p.category}</p><p class="price">$${p.price}</p>`;
     grid.appendChild(card);
   });
+  // [Баг 9]
   countEl.textContent = items.length;
 }
 
@@ -55,10 +62,13 @@ searchInput.addEventListener("input", render);
 categorySelect.addEventListener("change", render);
 sortSelect.addEventListener("change", render);
 
+// [Баг 10]
 resetBtn.addEventListener("click", () => {
   searchInput.value = "";
   categorySelect.value = "all";
   sortSelect.value = "default";
   render();
 });
+
+// [Баг 1]
 render();

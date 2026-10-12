@@ -24,6 +24,7 @@ function renderProducts() {
     card.innerHTML = `<h3>${p.name}</h3><p>${p.price} ₽</p>`;
     const btn = document.createElement("button");
     btn.textContent = "В корзину";
+    // [Баг 1]
     btn.addEventListener("click", () => addToCart(p.id));
     card.appendChild(btn);
     productsEl.appendChild(card);
@@ -35,7 +36,7 @@ function addToCart(id) {
   if (!product) {
     return;
   }
-
+  // [Баг 2]
   const existingItem = cart.find((item) => item.id === id);
   if (existingItem) {
     existingItem.qty++;
@@ -53,6 +54,7 @@ function addToCart(id) {
 function increaseQty(id) {
   const item = cart.find((i) => i.id === id);
   if (item) {
+    // [Баг 3]
     item.qty++;
     renderCart();
   }
@@ -61,6 +63,7 @@ function increaseQty(id) {
 function decreaseQty(id) {
   const item = cart.find((i) => i.id === id);
   if (item) {
+    // [Баг 4]
     if (item.qty > 1) {
       item.qty--;
     }
@@ -70,6 +73,7 @@ function decreaseQty(id) {
 
 function removeItem(id) {
   cart = cart.filter((i) => i.id !== id);
+  // (Улучшение): автоматический сброс промокода, если корзина опустела поштучно
   if (cart.length === 0) {
     resetPromoState(true);
   }
@@ -77,22 +81,24 @@ function removeItem(id) {
 }
 
 function applyPromo() {
+  // [Баг 8]
   if (discount > 0) {
-    resetPromoState(false);
+    resetPromoState(false); // (Улучшение): Не стираем текст в инпуте при ручной отмене скидки
   } else {
     if (promoInput.value.trim() === "SALE10") {
       discount = 0.1;
       promoBtn.textContent = "Отменить";
-      promoBtn.classList.add("applied");
+      promoBtn.classList.add("applied"); // (Улучшение): Кнопка становится зеленой
       promoInput.classList.remove("invalid");
     } else {
-      resetPromoState(false);
-      promoInput.classList.add("invalid");
+      resetPromoState(false); // (Улучшение): Сохраняем текст ошибки при неверном вводе
+      promoInput.classList.add("invalid"); // (Улучшение): Инпут подсвечивается красной рамкой
     }
   }
   renderCart();
 }
 
+// (Улучшение): Функция сброса промокода в начальный вид
 function resetPromoState(clearText = true) {
   discount = 0;
   promoBtn.textContent = "Применить";
@@ -103,6 +109,7 @@ function resetPromoState(clearText = true) {
 }
 
 function clearCart() {
+  // [Баг 9]
   cart = [];
   resetPromoState(true);
   renderCart();
@@ -110,9 +117,11 @@ function clearCart() {
 
 function renderCart() {
   cartItemsEl.innerHTML = "";
+  // [Баг 6]
   let total = 0;
 
   cart.forEach((item) => {
+    // [Баг 5]
     const lineTotal = item.price * item.qty;
     const li = document.createElement("li");
     li.className = "cart-item";
@@ -139,11 +148,15 @@ function renderCart() {
     total = total - total * discount;
   }
 
+  // [Баг 7]
   const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
   badgeEl.textContent = totalQty;
   totalEl.textContent = total;
 
+  // [Баг 10]
   emptyMsg.hidden = cart.length > 0;
+
+  // (Улучшение): блокировка элементов ввода при пустой корзине
   if (discount > 0) {
     promoBtn.disabled = false;
     promoInput.disabled = true;
@@ -154,6 +167,7 @@ function renderCart() {
   }
 }
 
+// (Улучшение): убираем красную подсветку ошибки при начале нового ввода промокода
 promoInput.addEventListener("input", () => {
   promoInput.classList.remove("invalid");
 });

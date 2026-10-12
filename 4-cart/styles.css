@@ -165,12 +165,14 @@ body {
   border-radius: 8px;
 }
 
+/* Состояние инпута, когда применен верный промокод и поле заблокировано */
 .promo input:disabled {
   background: #f1f5f9;
   color: #94a3b8;
   cursor: not-allowed;
 }
 
+/* Окрашивание инпута в красный цвет, если введен несуществующий промокод */
 .promo input.invalid {
   border-color: #dc2626;
   background-color: #fef2f2;
@@ -186,12 +188,14 @@ body {
   cursor: pointer;
 }
 
+/* Успешное состояние кнопки, когда промокод SALE10 успешно активирован */
 .promo button.applied {
   background: #10b981;
   color: #ffffff;
   cursor: pointer;
 }
 
+/* Блокировка кнопки «Применить», когда корзина полностью пуста */
 .promo button:disabled {
   background: #cbd5e1;
   color: #94a3b8;
