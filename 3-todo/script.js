@@ -11,7 +11,14 @@ let currentFilter = "all";
 let nextId = 1;
 
 function addTask() {
-  const text = input.value;
+  // [Баг 2]
+  const text = input.value.trim();
+  if (!text) {
+    errorEl.textContent = "Введите текст задачи";
+    errorEl.hidden = false;
+    return;
+  }
+
   errorEl.hidden = true;
   tasks.push({ id: nextId++, text: text, done: false });
   input.value = "";
@@ -20,36 +27,57 @@ function addTask() {
 
 function toggleTask(id) {
   const task = tasks.find((t) => t.id === id);
-  task.done = true;
-  render();
+  // [Баг 5]
+  if (task) {
+    task.done = !task.done;
+    render();
+  }
 }
 
 function deleteTask(id) {
-  tasks.filter((t) => t.id !== id);
+  // [Баг 6]
+  tasks = tasks.filter((t) => t.id !== id);
   render();
 }
 
 function clearCompleted() {
-  tasks = [];
+  // [Баг 10]
+  tasks = tasks.filter((t) => !t.done);
   render();
 }
 
 function getVisibleTasks() {
+  if (currentFilter === "active") {
+    return tasks.filter((t) => !t.done);
+  }
+  // [Баг 8]
+  if (currentFilter === "done") {
+    return tasks.filter((t) => t.done);
+  }
   return tasks;
 }
 
 function updateCounter() {
-  counter.textContent = "Активных задач: " + tasks.length;
+  // [Баг 7]
+  const activeCount = tasks.filter((t) => !t.done).length;
+  counter.textContent = "Активных задач: " + activeCount;
 }
 
 function render() {
+  // [Баг 9]
+  list.innerHTML = "";
+
   const visible = getVisibleTasks();
-  for (let i = 1; i <= visible.length; i++) {
+
+  // [Баг 3]
+  for (let i = 0; i < visible.length; i++) {
     const task = visible[i];
     const li = document.createElement("li");
     li.className = "task";
+
+    // [Баг 4]
     if (task.done) {
-      li.classList.add("completed");
+      li.classList.add("done");
     }
 
     const span = document.createElement("span");
@@ -69,7 +97,8 @@ function render() {
   updateCounter();
 }
 
-addBtn.addEventListener("dblclick", addTask);
+// [Баг 1]
+addBtn.addEventListener("click", addTask);
 clearBtn.addEventListener("click", clearCompleted);
 
 filterButtons.forEach((btn) => {
