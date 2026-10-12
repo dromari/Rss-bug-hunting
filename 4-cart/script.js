@@ -70,20 +70,41 @@ function decreaseQty(id) {
 
 function removeItem(id) {
   cart = cart.filter((i) => i.id !== id);
-  renderCart();
-}
-
-function applyPromo() {
-  if (promoInput.value.trim() === "SALE10") {
-    discount = 0.1;
-  } else {
-    discount = 0;
+  if (cart.length === 0) {
+    resetPromoState(true);
   }
   renderCart();
 }
 
+function applyPromo() {
+  if (discount > 0) {
+    resetPromoState(false);
+  } else {
+    if (promoInput.value.trim() === "SALE10") {
+      discount = 0.1;
+      promoBtn.textContent = "Отменить";
+      promoBtn.classList.add("applied");
+      promoInput.classList.remove("invalid");
+    } else {
+      resetPromoState(false);
+      promoInput.classList.add("invalid");
+    }
+  }
+  renderCart();
+}
+
+function resetPromoState(clearText = true) {
+  discount = 0;
+  promoBtn.textContent = "Применить";
+  promoBtn.classList.remove("applied");
+  if (clearText) {
+    promoInput.value = "";
+  }
+}
+
 function clearCart() {
   cart = [];
+  resetPromoState(true);
   renderCart();
 }
 
@@ -120,11 +141,22 @@ function renderCart() {
 
   const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
   badgeEl.textContent = totalQty;
-
   totalEl.textContent = total;
 
   emptyMsg.hidden = cart.length > 0;
+  if (discount > 0) {
+    promoBtn.disabled = false;
+    promoInput.disabled = true;
+  } else {
+    const isCartEmpty = cart.length === 0;
+    promoBtn.disabled = isCartEmpty;
+    promoInput.disabled = isCartEmpty;
+  }
 }
+
+promoInput.addEventListener("input", () => {
+  promoInput.classList.remove("invalid");
+});
 
 promoBtn.addEventListener("click", applyPromo);
 clearBtn.addEventListener("click", clearCart);
