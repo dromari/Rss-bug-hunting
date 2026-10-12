@@ -24,7 +24,7 @@ function renderProducts() {
     card.innerHTML = `<h3>${p.name}</h3><p>${p.price} ₽</p>`;
     const btn = document.createElement("button");
     btn.textContent = "В корзину";
-    btn.addEventListener("click", addToCart);
+    btn.addEventListener("click", () => addToCart(p.id));
     card.appendChild(btn);
     productsEl.appendChild(card);
   });
@@ -35,44 +35,85 @@ function addToCart(id) {
   if (!product) {
     return;
   }
-  cart.push({ id: product.id, name: product.name, price: product.price, qty: 1 });
+
+  const existingItem = cart.find((item) => item.id === id);
+  if (existingItem) {
+    existingItem.qty++;
+  } else {
+    cart.push({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      qty: 1,
+    });
+  }
   renderCart();
 }
 
 function increaseQty(id) {
   const item = cart.find((i) => i.id === id);
-  item.qty;
-  renderCart();
+  if (item) {
+    item.qty++;
+    renderCart();
+  }
 }
 
 function decreaseQty(id) {
   const item = cart.find((i) => i.id === id);
-  item.qty--;
-  renderCart();
+  if (item) {
+    if (item.qty > 1) {
+      item.qty--;
+    }
+    renderCart();
+  }
 }
 
 function removeItem(id) {
   cart = cart.filter((i) => i.id !== id);
-  renderCart();
-}
-
-function applyPromo() {
-  if ((promoInput.value = "SALE10")) {
-    discount = 0.1;
+  if (cart.length === 0) {
+    resetPromoState(true);
   }
   renderCart();
 }
 
+function applyPromo() {
+  if (discount > 0) {
+    resetPromoState(false);
+  } else {
+    if (promoInput.value.trim() === "SALE10") {
+      discount = 0.1;
+      promoBtn.textContent = "Отменить";
+      promoBtn.classList.add("applied");
+      promoInput.classList.remove("invalid");
+    } else {
+      resetPromoState(false);
+      promoInput.classList.add("invalid");
+    }
+  }
+  renderCart();
+}
+
+function resetPromoState(clearText = true) {
+  discount = 0;
+  promoBtn.textContent = "Применить";
+  promoBtn.classList.remove("applied");
+  if (clearText) {
+    promoInput.value = "";
+  }
+}
+
 function clearCart() {
-  cart.splice(0, 1);
+  cart = [];
+  resetPromoState(true);
   renderCart();
 }
 
 function renderCart() {
   cartItemsEl.innerHTML = "";
-  let total = "";
+  let total = 0;
+
   cart.forEach((item) => {
-    const lineTotal = item.price;
+    const lineTotal = item.price * item.qty;
     const li = document.createElement("li");
     li.className = "cart-item";
     li.innerHTML = `<span>${item.name}</span>
@@ -81,9 +122,15 @@ function renderCart() {
       <button class="qty-btn" data-act="inc">+</button>
       <span class="line">${lineTotal} ₽</span>
       <button class="remove">✕</button>`;
-    li.querySelector('[data-act="inc"]').addEventListener("click", () => increaseQty(item.id));
-    li.querySelector('[data-act="dec"]').addEventListener("click", () => decreaseQty(item.id));
-    li.querySelector(".remove").addEventListener("click", () => removeItem(item.id));
+    li.querySelector('[data-act="inc"]').addEventListener("click", () =>
+      increaseQty(item.id),
+    );
+    li.querySelector('[data-act="dec"]').addEventListener("click", () =>
+      decreaseQty(item.id),
+    );
+    li.querySelector(".remove").addEventListener("click", () =>
+      removeItem(item.id),
+    );
     cartItemsEl.appendChild(li);
     total += item.price * item.qty;
   });
@@ -92,10 +139,24 @@ function renderCart() {
     total = total - total * discount;
   }
 
-  badgeEl.textContent = cart.length;
+  const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+  badgeEl.textContent = totalQty;
   totalEl.textContent = total;
-  emptyMsg.hidden = true;
+
+  emptyMsg.hidden = cart.length > 0;
+  if (discount > 0) {
+    promoBtn.disabled = false;
+    promoInput.disabled = true;
+  } else {
+    const isCartEmpty = cart.length === 0;
+    promoBtn.disabled = isCartEmpty;
+    promoInput.disabled = isCartEmpty;
+  }
 }
+
+promoInput.addEventListener("input", () => {
+  promoInput.classList.remove("invalid");
+});
 
 promoBtn.addEventListener("click", applyPromo);
 clearBtn.addEventListener("click", clearCart);
